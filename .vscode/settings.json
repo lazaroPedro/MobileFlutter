@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "/home/lazaropedro/Projetos/Flutter/flutter_application/linux"
+    "cmake.sourceDirectory": "/home/lazaropedro/Projetos/Flutter/flutter_application/linux",
+    "code-runner.customCommand": "flutter run"
 }

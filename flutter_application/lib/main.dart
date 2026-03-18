@@ -1,18 +1,21 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const FraseDoDiaApp());
+  runApp(const MyApp());
 }
 
-class FraseDoDiaApp extends StatelessWidget {
-  const FraseDoDiaApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Frase do Dia",
       debugShowCheckedModeBanner: false,
+      title: 'Combustível Ideal',
+      theme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.green,
+      ),
       home: const HomePage(),
     );
   }
@@ -26,73 +29,100 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final gasolinaController = TextEditingController();
+  final etanolController = TextEditingController();
+  final rendimentoGasolinaController = TextEditingController();
+  final rendimentoEtanolController = TextEditingController();
 
-  final List<String> frases = [
-    "ChatGPT",
-    "Lhama",
-    "Gemini",
-    "Meta AI",
-    "Deepseek",
-    "Manus"
-  ];
+  String resultado = '';
 
-  String fraseAtual = "Clique no botão!";
-  String imagemAtual = "images/image1.jpg";
+  void calcular() {
+    final precoGasolina = double.tryParse(gasolinaController.text) ?? 0;
+    final precoEtanol = double.tryParse(etanolController.text) ?? 0;
+    final rendimentoGasolina =
+        double.tryParse(rendimentoGasolinaController.text) ?? 1;
+    final rendimentoEtanol =
+        double.tryParse(rendimentoEtanolController.text) ?? 1;
 
-  void gerarFrase() {
-    final random = Random();
+    if (precoGasolina == 0 || precoEtanol == 0) {
+      setState(() {
+        resultado = 'Preencha os valores corretamente';
+      });
+      return;
+    }
 
-    int numeroFrase = random.nextInt(frases.length);
-    int numeroImagem = random.nextInt(5) + 1;
+    double custoGasolina = precoGasolina / rendimentoGasolina;
+    double custoEtanol = precoEtanol / rendimentoEtanol;
+
+    double percentual = (precoEtanol / precoGasolina) * 100;
 
     setState(() {
-      fraseAtual = frases[numeroFrase];
-      imagemAtual = "images/image$numeroImagem.jpg";
+      if (custoEtanol < custoGasolina) {
+        resultado =
+            '👉 Vale a pena usar ETANOL\n(${percentual.toStringAsFixed(1)}% do preço da gasolina)';
+      } else {
+        resultado =
+            '👉 Vale a pena usar GASOLINA\n(${percentual.toStringAsFixed(1)}% do preço da gasolina)';
+      }
     });
+  }
+
+  Widget campo(String label, TextEditingController controller) {
+    return TextField(
+      controller: controller,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    gasolinaController.dispose();
+    etanolController.dispose();
+    rendimentoGasolinaController.dispose();
+    rendimentoEtanolController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Frase do Dia"),
-        centerTitle: true,
+        title: const Text('Combustível Ideal'),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            campo('Preço Gasolina (R\$)', gasolinaController),
+            const SizedBox(height: 10),
+            campo('Preço Etanol (R\$)', etanolController),
+            const SizedBox(height: 10),
+            campo('Km/L Gasolina', rendimentoGasolinaController),
+            const SizedBox(height: 10),
+            campo('Km/L Etanol', rendimentoEtanolController),
+            const SizedBox(height: 20),
 
-          Image.asset(
-            imagemAtual,
-            height: 250,
-          ),
+            ElevatedButton(
+              onPressed: calcular,
+              child: const Text('Calcular'),
+            ),
 
-          const SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              fraseAtual,
-              textAlign: TextAlign.center,
+            Text(
+              resultado,
               style: const TextStyle(
-                fontSize: 22,
-                fontFamily: "serif",
-                color: Colors.deepPurple,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
+              textAlign: TextAlign.center,
             ),
-          ),
-
-          const SizedBox(height: 30),
-
-          Center(
-            child: ElevatedButton(
-              onPressed: gerarFrase,
-              child: const Text("Nova Frase"),
-            ),
-          )
-
-        ],
+          ],
+        ),
       ),
     );
   }
